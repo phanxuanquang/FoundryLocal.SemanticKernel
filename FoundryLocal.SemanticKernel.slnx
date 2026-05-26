@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="FoundryLocal.SemanticKernel.App/FoundryLocal.SemanticKernel.App.csproj" />
+  <Project Path="FoundryLocal.SemanticKernel/FoundryLocal.SemanticKernel.csproj" />
+</Solution>
