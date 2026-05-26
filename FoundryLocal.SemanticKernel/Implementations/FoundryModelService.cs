@@ -55,14 +55,9 @@ public class FoundryModelService(IOptions<FoundryLocalOptions> options, ILogger<
 
         _logger.LogInformation("Retrieving model '{Alias}' from catalog.", ModelAlias);
         var catalog = await _manager.GetCatalogAsync(cancellationToken);
+        var model = await catalog.GetModelAsync(ModelAlias, cancellationToken);
 
-        _logger.LogInformation("Searching for model with alias or ID matching '{Alias}' in catalog.", ModelAlias);
-        var models = await catalog.ListModelsAsync(cancellationToken);
-
-        _currentModel = models.FirstOrDefault(m => m.Alias.Equals(ModelAlias, StringComparison.OrdinalIgnoreCase)
-            || m.Id.Equals(ModelAlias, StringComparison.OrdinalIgnoreCase)
-            || m.Variants.Any(v => v.Id.Equals(ModelAlias, StringComparison.OrdinalIgnoreCase)
-                || v.Alias.Equals(ModelAlias, StringComparison.OrdinalIgnoreCase)))
+        _currentModel = await catalog.GetModelAsync(ModelAlias, cancellationToken)
              ?? throw new InvalidOperationException($"Model '{ModelAlias}' not found in catalog.");
 
         _logger.LogInformation("Model '{Alias}' found with ID '{Id}'.", ModelAlias, _currentModel.Id);
