@@ -64,6 +64,13 @@ public class FoundryModelService(IOptions<FoundryLocalOptions> options, ILoggerF
              ?? throw new InvalidOperationException($"Model '{ModelAlias}' not found in catalog.");
 
         _logger.LogInformation("Model '{Alias}' found with ID '{Id}'.", ModelAlias, _currentModel.Id);
+
+        if (!await _currentModel.IsCachedAsync(cancellationToken))
+        {
+            _logger.LogInformation("Model '{Alias}' is not cached. Starting download.", ModelAlias);
+            await DownloadModelAsync(cancellationToken: cancellationToken);
+        }
+
         return _currentModel;
     }
 
@@ -128,6 +135,7 @@ public class FoundryModelService(IOptions<FoundryLocalOptions> options, ILoggerF
         }
 
         var model = await GetModelAsync(cancellationToken);
+
         if (!await model.IsLoadedAsync(cancellationToken))
         {
             _logger.LogInformation("Model '{Alias}' is not loaded. Loading model before starting web service.", ModelAlias);
