@@ -6,13 +6,13 @@ namespace FoundryLocal.SemanticKernel.Options;
 public sealed record FoundryLocalOptions
 {
     [Required]
-    public string AppName { get; init; }
+    public string AppName { get; init; } = default!;
 
     [Required]
-    public string WebServiceUrl { get; init; }
+    public string WebServiceUrl { get; init; } = default!;
 
     [Required]
-    public string ModelAliasOrId { get; init; }
+    public string ModelAlias { get; init; } = default!;
 
     public LogLevel LogLevel { get; init; } = LogLevel.Information;
 }

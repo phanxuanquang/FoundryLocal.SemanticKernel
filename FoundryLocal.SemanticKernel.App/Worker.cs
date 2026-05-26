@@ -1,4 +1,3 @@
-using Betalgo.Ranul.OpenAI.ObjectModels.RequestModels;
 using FoundryLocal.SemanticKernel.App.SemanticKernelPlugins;
 using FoundryLocal.SemanticKernel.Interfaces;
 using Microsoft.SemanticKernel;
@@ -33,7 +32,7 @@ public class Worker : BackgroundService
 
         var settings = new OpenAIPromptExecutionSettings
         {
-            FunctionChoiceBehavior = FunctionChoiceBehavior.Auto(),
+            ToolCallBehavior = ToolCallBehavior.AutoInvokeKernelFunctions,
             Temperature = 0.5,
         };
 

@@ -15,7 +15,7 @@ public class FoundryModelService(IOptions<FoundryLocalOptions> options, ILogger<
     private IModel? _currentModel;
     private bool _isWebServiceRunning = false;
 
-    public string ModelAlias => _options.ModelAliasOrId;
+    public string ModelAlias => _options.ModelAlias;
 
     public async Task<IModel> GetModelAsync(CancellationToken cancellationToken = default)
     {
@@ -29,7 +29,9 @@ public class FoundryModelService(IOptions<FoundryLocalOptions> options, ILogger<
             _logger.LogInformation("Initializing FoundryLocalManager with app name '{AppName}' and log level '{LogLevel}'.", _options.AppName, _options.LogLevel);
             var config = new Configuration
             {
-                AppName = _options.AppName,
+                AppName = string.IsNullOrEmpty(_options.AppName)
+                    ? nameof(FoundryModelService)
+                    : _options.AppName,
                 LogLevel = _options.LogLevel,
                 Web = new Configuration.WebService
                 {
@@ -40,14 +42,14 @@ public class FoundryModelService(IOptions<FoundryLocalOptions> options, ILogger<
             await FoundryLocalManager.CreateAsync(config, _logger, cancellationToken);
             _manager = FoundryLocalManager.Instance;
 
-            var currentEp = "";
+            var currentEp = string.Empty;
             await _manager.DownloadAndRegisterEpsAsync((epName, percent) =>
             {
                 if (epName != currentEp)
                 {
                     currentEp = epName;
                 }
-                _logger.LogInformation("Downloading EP '{EpName}' - {Percent}% complete.", epName, percent);
+                _logger.LogInformation("Downloading the execution provider '{EpName}': {Percent}%", epName, Math.Round(percent, 2));
             });
         }
 
@@ -87,7 +89,7 @@ public class FoundryModelService(IOptions<FoundryLocalOptions> options, ILogger<
         await model.DownloadAsync(progress =>
         {
             onProgress?.Invoke(progress);
-            _logger.LogInformation("Model '{Alias}' download progress: {Progress}%", ModelAlias, progress);
+            _logger.LogInformation("Downloading the model '{Alias}': {Progress}%", ModelAlias, Math.Round(progress, 2));
         });
 
         _logger.LogInformation("Model '{Alias}' download completed and cached.", ModelAlias);
@@ -100,6 +102,7 @@ public class FoundryModelService(IOptions<FoundryLocalOptions> options, ILogger<
         var isDownloaded = await model.IsCachedAsync(cancellationToken);
         if (isDownloaded)
         {
+            _logger.LogWarning("Deleting model '{Alias}' from cache.", ModelAlias);
             await model.RemoveFromCacheAsync(cancellationToken);
         }
     }
@@ -111,6 +114,7 @@ public class FoundryModelService(IOptions<FoundryLocalOptions> options, ILogger<
         var isLoaded = await model.IsLoadedAsync(cancellationToken);
         if (!isLoaded)
         {
+            _logger.LogInformation("Loading model '{Alias}' into memory.", ModelAlias);
             await model.LoadAsync(cancellationToken);
         }
     }
@@ -122,6 +126,7 @@ public class FoundryModelService(IOptions<FoundryLocalOptions> options, ILogger<
         var isLoaded = await model.IsLoadedAsync(cancellationToken);
         if (isLoaded)
         {
+            _logger.LogWarning("Unloading model '{Alias}' from memory.", ModelAlias);
             await model.UnloadAsync(cancellationToken);
             _currentModel = null;
         }
@@ -135,13 +140,7 @@ public class FoundryModelService(IOptions<FoundryLocalOptions> options, ILogger<
             return;
         }
 
-        var model = await GetModelAsync(cancellationToken);
-
-        if (!await model.IsLoadedAsync(cancellationToken))
-        {
-            _logger.LogInformation("Model '{Alias}' is not loaded. Loading model before starting web service.", ModelAlias);
-            await model.LoadAsync(cancellationToken);
-        }
+        await LoadModelAsync(cancellationToken);
 
         _logger.LogInformation("Starting web service with model '{Alias}'.", ModelAlias);
         await _manager!.StartWebServiceAsync();
@@ -170,7 +169,7 @@ public class FoundryModelService(IOptions<FoundryLocalOptions> options, ILogger<
 
         if (_currentModel != null)
         {
-            await UnloadModelAsync();
+            await _currentModel.UnloadAsync();
         }
 
         if (_manager != null)

@@ -26,7 +26,7 @@ public class Program
 
             return Kernel.CreateBuilder()
                 .AddOpenAIChatCompletion(
-                    modelId: options.ModelAliasOrId,
+                    modelId: options.ModelAlias,
                     apiKey: Guid.NewGuid().ToString(),
                     endpoint: new Uri(options.WebServiceUrl + "/v1"));
         });
