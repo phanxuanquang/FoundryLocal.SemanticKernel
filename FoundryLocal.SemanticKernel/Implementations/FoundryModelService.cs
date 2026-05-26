@@ -43,13 +43,19 @@ public class FoundryModelService(IOptions<FoundryLocalOptions> options, ILogger<
             _manager = FoundryLocalManager.Instance;
 
             var currentEp = string.Empty;
+            var currentPercent = 0;
             await _manager.DownloadAndRegisterEpsAsync((epName, percent) =>
             {
                 if (epName != currentEp)
                 {
                     currentEp = epName;
                 }
-                _logger.LogInformation("Downloading the execution provider '{EpName}': {Percent}%", epName, Math.Round(percent, 2));
+
+                if ((int)percent != currentPercent)
+                {
+                    currentPercent = (int)percent;
+                    _logger.LogInformation("Downloading the execution provider '{EpName}': {Percent}%", epName, Math.Round(percent, 2));
+                }
             });
         }
 
@@ -81,10 +87,16 @@ public class FoundryModelService(IOptions<FoundryLocalOptions> options, ILogger<
             return;
         }
 
+        var currentProgress = 0;
         await model.DownloadAsync(progress =>
         {
             onProgress?.Invoke(progress);
-            _logger.LogInformation("Downloading the model '{Alias}': {Progress}%", ModelAlias, Math.Round(progress, 2));
+
+            if ((int)progress != currentProgress)
+            {
+                currentProgress = (int)progress;
+                _logger.LogInformation("Downloading the model '{Alias}': {Progress}%", ModelAlias, Math.Round(progress, 2));
+            }
         });
 
         _logger.LogInformation("Model '{Alias}' download completed and cached.", ModelAlias);
