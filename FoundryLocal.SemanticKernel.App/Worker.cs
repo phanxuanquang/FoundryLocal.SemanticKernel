@@ -1,3 +1,4 @@
+using Betalgo.Ranul.OpenAI.ObjectModels.RequestModels;
 using FoundryLocal.SemanticKernel.App.SemanticKernelPlugins;
 using FoundryLocal.SemanticKernel.Interfaces;
 using Microsoft.SemanticKernel;
@@ -19,8 +20,8 @@ public class Worker : BackgroundService
         _logger = logger;
         _modelService = modelService;
 
-        kernelBuilder.Plugins.AddFromType<DateTimePlugin>("Time");
-        kernelBuilder.Plugins.AddFromType<WeatherPlugin>("Weather");
+        kernelBuilder.Plugins.AddFromType<DateTimePlugin>();
+        kernelBuilder.Plugins.AddFromType<CalculatorPlugin>();
         _kernel = kernelBuilder.Build();
         _chatCompletionService = _kernel.GetRequiredService<IChatCompletionService>();
     }
@@ -32,7 +33,8 @@ public class Worker : BackgroundService
 
         var settings = new OpenAIPromptExecutionSettings
         {
-            FunctionChoiceBehavior = FunctionChoiceBehavior.Auto(autoInvoke: true),
+            FunctionChoiceBehavior = FunctionChoiceBehavior.Auto(),
+            Temperature = 0.5,
         };
 
         var chatHistory = new ChatHistory("You are a helpful assistant that can provide the current date and time, as well as weather information for a given location.");

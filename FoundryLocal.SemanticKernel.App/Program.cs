@@ -12,27 +12,22 @@ public class Program
     {
         var builder = Host.CreateApplicationBuilder(args);
 
+        builder.Logging.ClearProviders();
+        builder.Logging.AddConsole();
+
         builder.Services.AddOptions<FoundryLocalOptions>()
                 .Bind(builder.Configuration.GetSection(nameof(FoundryLocalOptions)))
                 .ValidateOnStart();
 
-        builder.Services.AddSingleton<IFoundryModelService>(sp =>
-            new FoundryModelService(
-                sp.GetRequiredService<IOptions<FoundryLocalOptions>>(),
-                sp.GetRequiredService<ILoggerFactory>()));
+        builder.Services.AddSingleton<IFoundryModelService, FoundryModelService>();
         builder.Services.AddSingleton(sp =>
         {
-            var configuration = sp.GetRequiredService<IConfiguration>();
-
-            var options = configuration
-               .GetSection(nameof(FoundryLocalOptions))
-               .Get<FoundryLocalOptions>()
-                   ?? throw new InvalidOperationException($"Configuration section '{nameof(FoundryLocalOptions)}' is missing or invalid.");
+            var options = sp.GetRequiredService<IOptions<FoundryLocalOptions>>().Value;
 
             return Kernel.CreateBuilder()
                 .AddOpenAIChatCompletion(
                     modelId: options.ModelAliasOrId,
-                    apiKey: "not-needed",
+                    apiKey: Guid.NewGuid().ToString(),
                     endpoint: new Uri(options.WebServiceUrl + "/v1"));
         });
 

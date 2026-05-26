@@ -7,9 +7,9 @@ using Microsoft.Extensions.Options;
 
 namespace FoundryLocal.SemanticKernel.Implementations;
 
-public class FoundryModelService(IOptions<FoundryLocalOptions> options, ILoggerFactory? loggerFactory = null) : IFoundryModelService, IAsyncDisposable
+public class FoundryModelService(IOptions<FoundryLocalOptions> options, ILogger<FoundryModelService>? logger = null) : IFoundryModelService, IAsyncDisposable
 {
-    private readonly ILogger<FoundryModelService> _logger = loggerFactory?.CreateLogger<FoundryModelService>() ?? NullLogger<FoundryModelService>.Instance;
+    private readonly ILogger<FoundryModelService> _logger = logger ?? NullLogger<FoundryModelService>.Instance;
     private readonly FoundryLocalOptions _options = options.Value;
     private FoundryLocalManager? _manager;
     private IModel? _currentModel;
@@ -123,6 +123,7 @@ public class FoundryModelService(IOptions<FoundryLocalOptions> options, ILoggerF
         if (isLoaded)
         {
             await model.UnloadAsync(cancellationToken);
+            _currentModel = null;
         }
     }
 
@@ -170,12 +171,12 @@ public class FoundryModelService(IOptions<FoundryLocalOptions> options, ILoggerF
         if (_currentModel != null)
         {
             await UnloadModelAsync();
-            _currentModel = null;
         }
 
         if (_manager != null)
         {
             _manager.Dispose();
+            _manager = null;
         }
     }
 }
