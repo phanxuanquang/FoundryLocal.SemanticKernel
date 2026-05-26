@@ -1,7 +1,7 @@
+using FoundryLocal.SemanticKernel.App.SemanticKernelPlugins;
 using FoundryLocal.SemanticKernel.Implementations;
 using FoundryLocal.SemanticKernel.Interfaces;
 using FoundryLocal.SemanticKernel.Options;
-using Microsoft.Extensions.Options;
 using Microsoft.SemanticKernel;
 
 namespace FoundryLocal.SemanticKernel.App;
@@ -20,16 +20,16 @@ public class Program
                 .ValidateOnStart();
 
         builder.Services.AddSingleton<IFoundryModelService, FoundryModelService>();
-        builder.Services.AddSingleton(sp =>
-        {
-            var options = sp.GetRequiredService<IOptions<FoundryLocalOptions>>().Value;
 
-            return Kernel.CreateBuilder()
-                .AddOpenAIChatCompletion(
-                    modelId: options.ModelAlias,
-                    apiKey: Guid.NewGuid().ToString(),
-                    endpoint: new Uri(options.WebServiceUrl + "/v1"));
-        });
+        builder.Services
+            .AddKernel().Plugins
+                .AddFromType<DateTimePlugin>();
+
+        var options = builder.Configuration
+            .GetSection(nameof(FoundryLocalOptions))
+            .Get<FoundryLocalOptions>()
+                ?? throw new InvalidOperationException("Failed to bind FoundryLocalOptions from configuration.");
+        builder.Services.AddOpenAIChatCompletion(options.ModelAlias, new Uri($"{options.WebServiceUrl}/v1"));
 
         builder.Services.AddHostedService<Worker>();
         var host = builder.Build();

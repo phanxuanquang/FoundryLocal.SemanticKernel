@@ -1,4 +1,3 @@
-using FoundryLocal.SemanticKernel.App.SemanticKernelPlugins;
 using FoundryLocal.SemanticKernel.Interfaces;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
@@ -9,20 +8,15 @@ namespace FoundryLocal.SemanticKernel.App;
 
 public class Worker : BackgroundService
 {
+    private readonly IServiceScopeFactory _scopeFactory;
     private readonly ILogger<Worker> _logger;
     private readonly IFoundryModelService _modelService;
-    private readonly IChatCompletionService _chatCompletionService;
-    private readonly Kernel _kernel;
 
-    public Worker(ILogger<Worker> logger, IFoundryModelService modelService, IKernelBuilder kernelBuilder)
+    public Worker(ILogger<Worker> logger, IFoundryModelService modelService, IServiceScopeFactory scopeFactory)
     {
         _logger = logger;
         _modelService = modelService;
-
-        kernelBuilder.Plugins.AddFromType<DateTimePlugin>();
-        kernelBuilder.Plugins.AddFromType<CalculatorPlugin>();
-        _kernel = kernelBuilder.Build();
-        _chatCompletionService = _kernel.GetRequiredService<IChatCompletionService>();
+        _scopeFactory = scopeFactory;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -30,10 +24,14 @@ public class Worker : BackgroundService
         _logger.LogInformation("Starting web service with model '{ModelAlias}'...", _modelService.ModelAlias);
         await _modelService.StartWebServiceWithModelAsync(stoppingToken);
 
+        await using var scope = _scopeFactory.CreateAsyncScope();
+        var kernel = scope.ServiceProvider.GetRequiredService<Kernel>();
+        var chatCompletionService = kernel.GetRequiredService<IChatCompletionService>();
+
         var settings = new OpenAIPromptExecutionSettings
         {
-            ToolCallBehavior = ToolCallBehavior.AutoInvokeKernelFunctions,
-            Temperature = 0.5,
+            FunctionChoiceBehavior = FunctionChoiceBehavior.Auto(autoInvoke: true),
+            Temperature = 0.7,
         };
 
         var chatHistory = new ChatHistory("You are a helpful assistant that can provide the current date and time, as well as weather information for a given location.");
@@ -46,7 +44,7 @@ public class Worker : BackgroundService
                 var prompt = Console.ReadLine()!;
                 chatHistory.AddUserMessage(prompt);
 
-                var response = await _chatCompletionService.GetChatMessageContentsAsync(chatHistory, settings, _kernel, stoppingToken);
+                var response = await chatCompletionService.GetChatMessageContentsAsync(chatHistory, settings, kernel, stoppingToken);
                 chatHistory.AddRange(response);
                 Console.WriteLine($"> Assistant: {response.LastOrDefault()}");
             }
