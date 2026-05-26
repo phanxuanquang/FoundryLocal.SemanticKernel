@@ -31,7 +31,7 @@ public class Program
 
             return Kernel.CreateBuilder()
                 .AddOpenAIChatCompletion(
-                    modelId: options.DefaultModelAlias,
+                    modelId: options.ModelAliasOrId,
                     apiKey: "not-needed",
                     endpoint: new Uri(options.WebServiceUrl + "/v1"));
         });

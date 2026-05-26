@@ -15,7 +15,7 @@ public class FoundryModelService(IOptions<FoundryLocalOptions> options, ILoggerF
     private IModel? _currentModel;
     private bool _isWebServiceRunning = false;
 
-    public string ModelAlias => _options.DefaultModelAlias;
+    public string ModelAlias => _options.ModelAliasOrId;
 
     public async Task<IModel> GetModelAsync(CancellationToken cancellationToken = default)
     {

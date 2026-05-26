@@ -1,14 +1,18 @@
 ﻿using Microsoft.AI.Foundry.Local;
+using System.ComponentModel.DataAnnotations;
 
 namespace FoundryLocal.SemanticKernel.Options;
 
-public sealed class FoundryLocalOptions
+public sealed record FoundryLocalOptions
 {
-    public string AppName { get; set; } = "FoundryLocal-SemanticKernel";
+    [Required]
+    public string AppName { get; init; }
 
-    public string WebServiceUrl { get; set; } = "http://127.0.0.1:52495";
+    [Required]
+    public string WebServiceUrl { get; init; }
 
-    public string DefaultModelAlias { get; set; } = "phi-4-mini";
+    [Required]
+    public string ModelAliasOrId { get; init; }
 
-    public LogLevel LogLevel { get; set; } = LogLevel.Information;
+    public LogLevel LogLevel { get; init; } = LogLevel.Information;
 }
