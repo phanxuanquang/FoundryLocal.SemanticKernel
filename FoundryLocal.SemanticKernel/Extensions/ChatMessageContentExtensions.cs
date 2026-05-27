@@ -4,7 +4,7 @@ using System.Text.RegularExpressions;
 
 namespace FoundryLocal.SemanticKernel.Extensions;
 
-public static partial class ChatMessageContentExtensions
+internal static partial class ChatMessageContentExtensions
 {
     [GeneratedRegex(@"<tool_call>\s*<function=(?<name>[^>]+?)>(?<args>[\s\S]*?)</function>\s*</tool_call>", RegexOptions.Compiled | RegexOptions.Singleline)]
     private static partial Regex ToolCallRegex();
@@ -12,7 +12,7 @@ public static partial class ChatMessageContentExtensions
     [GeneratedRegex(@"<parameter=(?<paramName>[^>]+?)>\s*(?<paramValue>[\s\S]*?)\s*</parameter>", RegexOptions.Compiled | RegexOptions.Singleline)]
     private static partial Regex FunctionCallParameterRegex();
 
-    public static IReadOnlyList<FunctionCallContent> GetParsedToolCalls(this ChatMessageContent message)
+    internal static IReadOnlyList<FunctionCallContent> GetParsedToolCalls(this ChatMessageContent message)
     {
         var text = message.Content;
 

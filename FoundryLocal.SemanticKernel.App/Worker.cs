@@ -1,7 +1,7 @@
 using FoundryLocal.SemanticKernel.Interfaces;
+using FoundryLocal.SemanticKernel.Models;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
-using Microsoft.SemanticKernel.Connectors.OpenAI;
 using IChatCompletionService = Microsoft.SemanticKernel.ChatCompletion.IChatCompletionService;
 
 namespace FoundryLocal.SemanticKernel.App;
@@ -27,10 +27,11 @@ public class Worker : BackgroundService
         var kernel = scope.ServiceProvider.GetRequiredService<Kernel>();
         var chatCompletionService = kernel.GetRequiredService<IChatCompletionService>();
 
-        var settings = new OpenAIPromptExecutionSettings
+        var settings = new FoundryLocalPromptExecutionSettings
         {
-            FunctionChoiceBehavior = FunctionChoiceBehavior.Auto(autoInvoke: true),
+            FunctionChoiceBehavior = FunctionChoiceBehavior.Auto(autoInvoke: false), // Set to false to prevent automatic function invocation
             Temperature = 0.7,
+            MaxTokens = 4096,
         };
 
         var chatHistory = new ChatHistory("You are a helpful assistant that can provide the current date and time, as well as weather information for a given location. /no_think");

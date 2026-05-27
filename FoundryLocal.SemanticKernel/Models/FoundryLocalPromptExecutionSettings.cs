@@ -1,9 +1,11 @@
 ﻿using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
+using System.Text.Json.Serialization;
 
 namespace FoundryLocal.SemanticKernel.Models;
 
-public class FoundryLocalPromptExecutionSettings : OpenAIPromptExecutionSettings
+[JsonNumberHandling(JsonNumberHandling.AllowReadingFromString)]
+public sealed class FoundryLocalPromptExecutionSettings : OpenAIPromptExecutionSettings
 {
     public FoundryLocalPromptExecutionSettings(PromptExecutionSettings? promptExecutionSettings = null) : base()
     {
