@@ -1,5 +1,6 @@
 ﻿using FoundryLocal.SemanticKernel.Implementations;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
 
@@ -23,7 +24,9 @@ public static class DependencyInjection
             apiKey: "NO-API-KEY-NEEDED",
             endpoint: endpoint));
 
-        // Register the decorator as the IChatCompletionService the Kernel will resolve. It intercepts Qwen3's XML tool-call text and runs the full agentic loop.
-        return services.AddSingleton<IChatCompletionService>(sp => new FoundryLocalChatCompletionService(sp.GetRequiredService<OpenAIChatCompletionService>()));
+        // Register the decorator as the IChatCompletionService the Kernel will resolve. 
+        return services.AddSingleton<IChatCompletionService>(sp => new FoundryLocalChatCompletionService(
+            inner: sp.GetRequiredService<OpenAIChatCompletionService>(),
+            logger: sp.GetService<ILogger<FoundryLocalChatCompletionService>>()));
     }
 }

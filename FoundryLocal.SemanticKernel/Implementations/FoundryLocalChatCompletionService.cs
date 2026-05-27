@@ -13,7 +13,7 @@ namespace FoundryLocal.SemanticKernel.Implementations;
 
 public sealed class FoundryLocalChatCompletionService(IChatCompletionService inner, ILogger<FoundryLocalChatCompletionService>? logger = null) : IChatCompletionService
 {
-    private const sbyte MaxIterations = 8;
+    private const sbyte MaxIterations = 5;
 
     private readonly IChatCompletionService _inner = inner;
     private readonly ILogger<FoundryLocalChatCompletionService> _logger = logger ?? NullLogger<FoundryLocalChatCompletionService>.Instance;
