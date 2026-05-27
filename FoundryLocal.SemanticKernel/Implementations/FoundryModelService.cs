@@ -24,7 +24,7 @@ public class FoundryModelService(IOptions<FoundryLocalOptions> options, ILogger<
             return _currentModel;
         }
 
-        if (_manager == null)
+        if (_manager == null || !FoundryLocalManager.IsInitialized)
         {
             _logger.LogInformation("Initializing FoundryLocalManager with app name '{AppName}' and log level '{LogLevel}'.", _options.AppName, _options.LogLevel);
             var config = new Configuration
@@ -39,6 +39,8 @@ public class FoundryModelService(IOptions<FoundryLocalOptions> options, ILogger<
                 }
             };
 
+            var x = await FoundryLocalManager.CreateAsync();
+
             await FoundryLocalManager.CreateAsync(config, _logger, cancellationToken);
             _manager = FoundryLocalManager.Instance;
 
@@ -46,10 +48,7 @@ public class FoundryModelService(IOptions<FoundryLocalOptions> options, ILogger<
             var currentPercent = 0;
             await _manager.DownloadAndRegisterEpsAsync((epName, percent) =>
             {
-                if (epName != currentEp)
-                {
-                    currentEp = epName;
-                }
+                currentEp = epName;
 
                 if ((int)percent != currentPercent)
                 {
@@ -61,7 +60,6 @@ public class FoundryModelService(IOptions<FoundryLocalOptions> options, ILogger<
 
         _logger.LogInformation("Retrieving model '{Alias}' from catalog.", ModelAlias);
         var catalog = await _manager.GetCatalogAsync(cancellationToken);
-        var model = await catalog.GetModelAsync(ModelAlias, cancellationToken);
 
         _currentModel = await catalog.GetModelAsync(ModelAlias, cancellationToken)
              ?? throw new InvalidOperationException($"Model '{ModelAlias}' not found in catalog.");
