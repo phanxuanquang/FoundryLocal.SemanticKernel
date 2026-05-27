@@ -39,8 +39,6 @@ public class FoundryModelService(IOptions<FoundryLocalOptions> options, ILogger<
                 }
             };
 
-            var x = await FoundryLocalManager.CreateAsync();
-
             await FoundryLocalManager.CreateAsync(config, _logger, cancellationToken);
             _manager = FoundryLocalManager.Instance;
 

@@ -30,11 +30,11 @@ public class Worker : BackgroundService
 
         var settings = new OpenAIPromptExecutionSettings
         {
-            FunctionChoiceBehavior = FunctionChoiceBehavior.Auto(autoInvoke: true),
+            FunctionChoiceBehavior = FunctionChoiceBehavior.Auto(autoInvoke: false),
             Temperature = 0.7,
         };
 
-        var chatHistory = new ChatHistory("You are a helpful assistant that can provide the current date and time, as well as weather information for a given location.");
+        var chatHistory = new ChatHistory("You are a helpful assistant that can provide the current date and time, as well as weather information for a given location. /no_think");
 
         while (!stoppingToken.IsCancellationRequested)
         {
@@ -42,11 +42,18 @@ public class Worker : BackgroundService
             {
                 Console.Write("> You: ");
                 var prompt = Console.ReadLine()!;
+
+                if (string.IsNullOrWhiteSpace(prompt))
+                {
+                    Console.WriteLine("Please enter a valid prompt.");
+                    continue;
+                }
+
                 chatHistory.AddUserMessage(prompt);
 
-                var response = await chatCompletionService.GetChatMessageContentsAsync(chatHistory, settings, kernel, stoppingToken);
-                chatHistory.AddRange(response);
-                Console.WriteLine($"> Assistant: {response.LastOrDefault()}");
+                var response = await chatCompletionService.GetChatMessageContentAsync(chatHistory, settings, kernel, stoppingToken);
+                chatHistory.Add(response);
+                Console.WriteLine($"> Assistant: {response}");
             }
             catch (Exception ex)
             {

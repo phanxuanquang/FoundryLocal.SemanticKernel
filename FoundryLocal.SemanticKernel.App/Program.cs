@@ -23,12 +23,14 @@ public class Program
 
         builder.Services
             .AddKernel().Plugins
-                .AddFromType<DateTimePlugin>();
+                .AddFromType<DateTimePlugin>()
+                .AddFromType<CalculatorPlugin>();
 
         var options = builder.Configuration
             .GetSection(nameof(FoundryLocalOptions))
             .Get<FoundryLocalOptions>()
                 ?? throw new InvalidOperationException("Failed to bind FoundryLocalOptions from configuration.");
+
         builder.Services.AddOpenAIChatCompletion(options.ModelAlias, new Uri($"{options.WebServiceUrl}/v1"));
 
         builder.Services.AddHostedService<Worker>();
