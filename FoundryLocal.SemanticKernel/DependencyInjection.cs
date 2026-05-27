@@ -18,15 +18,12 @@ public static class DependencyInjection
     /// <returns></returns>
     public static IServiceCollection AddFoundryLocalChatCompletion(this IServiceCollection services, string modelAlias, Uri endpoint)
     {
-        // Register the inner OpenAI service by its concrete type (not as IChatCompletionService) so the decorator can resolve and wrap it.
-        services.AddSingleton(new OpenAIChatCompletionService(
-            modelId: modelAlias,
-            apiKey: "NO-API-KEY-NEEDED",
-            endpoint: endpoint));
-
         // Register the decorator as the IChatCompletionService the Kernel will resolve. 
         return services.AddSingleton<IChatCompletionService>(sp => new FoundryLocalChatCompletionService(
-            inner: sp.GetRequiredService<OpenAIChatCompletionService>(),
+            inner: sp.GetService<OpenAIChatCompletionService>() ?? new OpenAIChatCompletionService(
+                modelId: modelAlias,
+                apiKey: "NO-API-KEY-NEEDED",
+                endpoint: endpoint),
             logger: sp.GetService<ILogger<FoundryLocalChatCompletionService>>()));
     }
 }
