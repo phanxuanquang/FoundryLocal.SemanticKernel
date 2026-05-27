@@ -2,6 +2,7 @@ using FoundryLocal.SemanticKernel.Interfaces;
 using FoundryLocal.SemanticKernel.Models;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
+using System.Text;
 using IChatCompletionService = Microsoft.SemanticKernel.ChatCompletion.IChatCompletionService;
 
 namespace FoundryLocal.SemanticKernel.App;
@@ -30,11 +31,13 @@ public class Worker : BackgroundService
         var settings = new FoundryLocalPromptExecutionSettings
         {
             FunctionChoiceBehavior = FunctionChoiceBehavior.Auto(autoInvoke: false), // Set to false to prevent automatic function invocation
-            Temperature = 0.7,
-            MaxTokens = 4096,
+            MaxTokens = 32768,
         };
 
         var chatHistory = new ChatHistory("You are a helpful assistant that can provide the current date and time, as well as weather information for a given location. /no_think");
+
+        Console.OutputEncoding = Encoding.UTF8;
+        Console.InputEncoding = Encoding.UTF8;
 
         while (!stoppingToken.IsCancellationRequested)
         {

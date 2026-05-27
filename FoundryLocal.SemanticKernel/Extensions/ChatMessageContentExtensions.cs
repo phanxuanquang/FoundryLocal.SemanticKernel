@@ -88,7 +88,7 @@ internal static partial class ChatMessageContentExtensions
             calls.Add(new FunctionCallContent(
                 functionName: functionName,
                 pluginName: pluginName,
-                id: $"{fullNameSpan.ToString()}{(arguments is not null ? $"({string.Join(",", arguments.Select(kv => $"{kv.Key}={kv.Value}"))})" : "")}", // Example: "WeatherPlugin_GetCurrentWeather(location=Seattle)"
+                id: $"{fullNameSpan}{(arguments is not null ? $"({string.Join(",", arguments.Select(kv => $"{kv.Key}={kv.Value}"))})" : "")}", // Example: "WeatherPlugin_GetCurrentWeather(location=Seattle)"
                 arguments: arguments));
         }
 

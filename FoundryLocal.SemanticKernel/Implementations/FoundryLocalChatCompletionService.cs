@@ -30,6 +30,12 @@ public sealed class FoundryLocalChatCompletionService(IChatCompletionService inn
             ? new FoundryLocalPromptExecutionSettings()
             : FoundryLocalPromptExecutionSettings.FromExecutionSettings(executionSettings);
 
+        var jsonSerializerOptions = new JsonSerializerOptions
+        {
+            WriteIndented = true,
+            AllowDuplicateProperties = false
+        };
+
         for (var iteration = 0; iteration < MaxIterations; iteration++)
         {
             var responses = await _inner.GetChatMessageContentsAsync(chatHistory, executionSettings, kernel, cancellationToken);
@@ -38,15 +44,12 @@ public sealed class FoundryLocalChatCompletionService(IChatCompletionService inn
                 return responses;
 
             var toolCalls = responses
-                .AsParallel()
                 .SelectMany(r => r.GetParsedToolCalls())
                 .ToList();
 
-            if (toolCalls is null || toolCalls.Count == 0)
+            if (toolCalls.Count == 0)
                 return responses;
 
-            _logger.LogTrace("Found {ToolCallCount} tool calls in model response, beginning iteration {Iteration}",
-                toolCalls.Count, iteration + 1);
             var requestItems = new ChatMessageContentItemCollection();
             foreach (var call in toolCalls)
             {
@@ -78,16 +81,10 @@ public sealed class FoundryLocalChatCompletionService(IChatCompletionService inn
                             .Where(kv => kv.Value is not null)
                             .ToFrozenDictionary(kv => kv.Key, kv => kv.Value?.ToString());
 
-                        var argsJson = JsonSerializer.Serialize(argsDict, new JsonSerializerOptions
-                        {
-                            WriteIndented = true,
-                            AllowDuplicateProperties = false
-                        });
-
                         sb.Append(" with arguments:");
                         sb.AppendLine();
                         sb.AppendLine("```json");
-                        sb.AppendLine(argsJson);
+                        sb.AppendLine(JsonSerializer.Serialize(argsDict, jsonSerializerOptions));
                         sb.AppendLine("```");
                     }
                     else
@@ -107,11 +104,14 @@ public sealed class FoundryLocalChatCompletionService(IChatCompletionService inn
                         new TextContent(sb.ToString())
                     };
 
-                    resultItems.Add(new ChatMessageContent(AuthorRole.Tool, errorContent));
+                    resultItems.Add(new FunctionResultContent(
+                        callId: call.Id,
+                        functionName: call.FunctionName,
+                        pluginName: call.PluginName,
+                        result: sb.ToString()));
                 }
             }
 
-            // 3. Add tool results to history and let the model continue.
             chatHistory.Add(new ChatMessageContent(AuthorRole.Tool, resultItems));
         }
 
@@ -124,7 +124,6 @@ public sealed class FoundryLocalChatCompletionService(IChatCompletionService inn
         Kernel? kernel = null,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        // Passthrough — streaming tool-call parsing is not implemented.
         await foreach (var chunk in _inner.GetStreamingChatMessageContentsAsync(
             chatHistory, executionSettings, kernel, cancellationToken))
         {
