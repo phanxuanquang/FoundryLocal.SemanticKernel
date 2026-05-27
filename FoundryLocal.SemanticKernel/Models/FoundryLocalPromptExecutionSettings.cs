@@ -24,10 +24,7 @@ public class FoundryLocalPromptExecutionSettings : OpenAIPromptExecutionSettings
 
     public static FoundryLocalPromptExecutionSettings FromExecutionSettings(PromptExecutionSettings promptExecutionSettings)
     {
-        if (promptExecutionSettings == null)
-        {
-            throw new ArgumentNullException(nameof(promptExecutionSettings));
-        }
+        ArgumentNullException.ThrowIfNull(promptExecutionSettings);
 
         return new FoundryLocalPromptExecutionSettings(promptExecutionSettings);
     }
