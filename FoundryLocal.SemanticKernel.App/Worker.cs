@@ -30,7 +30,7 @@ public class Worker : BackgroundService
 
         var settings = new OpenAIPromptExecutionSettings
         {
-            FunctionChoiceBehavior = FunctionChoiceBehavior.Auto(autoInvoke: false),
+            FunctionChoiceBehavior = FunctionChoiceBehavior.Auto(autoInvoke: true),
             Temperature = 0.7,
         };
 
@@ -52,6 +52,7 @@ public class Worker : BackgroundService
                 chatHistory.AddUserMessage(prompt);
 
                 var response = await chatCompletionService.GetChatMessageContentAsync(chatHistory, settings, kernel, stoppingToken);
+
                 chatHistory.Add(response);
                 Console.WriteLine($"> Assistant: {response}");
             }
