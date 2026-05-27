@@ -24,7 +24,8 @@ public class Program
         builder.Services
             .AddKernel().Plugins
                 .AddFromType<DateTimePlugin>()
-                .AddFromType<CalculatorPlugin>();
+                .AddFromType<CalculatorPlugin>()
+                .AddFromType<FilePlugin>();
 
         var options = builder.Configuration
             .GetSection(nameof(FoundryLocalOptions))

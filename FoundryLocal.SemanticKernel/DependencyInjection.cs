@@ -1,7 +1,6 @@
 ﻿using FoundryLocal.SemanticKernel.Implementations;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
 
@@ -21,10 +20,7 @@ public static class DependencyInjection
     {
         // Register the decorator as the IChatCompletionService the Kernel will resolve. 
         return services.AddSingleton<IChatCompletionService>(sp => new FoundryLocalChatCompletionService(
-            inner: new OpenAIChatCompletionService(
-                modelId: modelAlias,
-                apiKey: "NO-API-KEY-NEEDED",
-                endpoint: endpoint),
+            inner: new OpenAIChatCompletionService(modelId: modelAlias, endpoint: endpoint),
             logger: sp.GetService<ILogger<FoundryLocalChatCompletionService>>()));
     }
 }

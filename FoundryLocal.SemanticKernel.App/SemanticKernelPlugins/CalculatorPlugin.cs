@@ -1,34 +1,43 @@
 ﻿using Microsoft.SemanticKernel;
 using System.ComponentModel;
-using System.Data;
 
 namespace FoundryLocal.SemanticKernel.App.SemanticKernelPlugins;
 
-[Description("A plugin that provides basic calculator functions.")]
 public sealed class CalculatorPlugin
 {
     private readonly ILogger<CalculatorPlugin> _logger;
-    public CalculatorPlugin(ILogger<CalculatorPlugin>? logger = null)
+
+    public CalculatorPlugin(ILogger<CalculatorPlugin> logger)
     {
-        _logger = logger ?? new LoggerFactory().CreateLogger<CalculatorPlugin>();
+        _logger = logger;
     }
 
-    [KernelFunction("calculate")]
-    [Description("Evaluates a simple mathematical expression and returns the result. Supports basic operations like addition, subtraction, multiplication, and division.")]
-    public string Calculate(
-        [Description("The mathematical expression to evaluate")]
-        string expression)
+    [KernelFunction("add")]
+    [Description("Add two numbers together")]
+    public double Add(
+        [Description("First number")] double a,
+        [Description("Second number")] double b)
     {
-        try
+        _logger.LogInformation("Adding {A} + {B}", a, b);
+
+        return a + b;
+    }
+
+    [KernelFunction("divide")]
+    [Description("Divide two numbers")]
+    public double Divide(
+        [Description("Dividend")] double a,
+        [Description("Divisor")] double b)
+    {
+        _logger.LogInformation("Dividing {A} / {B}", a, b);
+
+        if (b == 0)
         {
-            var result = new DataTable().Compute(expression, null);
-            _logger.LogInformation("Calculated expression '{Expression}' with result: {Result}", expression, result);
-            return result.ToString() ?? "Error: Unable to compute result.";
+            _logger.LogWarning("Division by zero attempted");
+
+            throw new DivideByZeroException("Cannot divide by zero");
         }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error calculating expression '{Expression}'", expression);
-            return $"Error: Invalid expression. {ex.Message}";
-        }
+
+        return Math.Round(a / b, 2);
     }
 }
