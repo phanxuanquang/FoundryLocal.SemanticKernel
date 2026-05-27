@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Worker">
 
   <PropertyGroup>
-    <TargetFramework>net10.0-windows10.0.26100</TargetFramework>
+    <TargetFramework>net8.0-windows10.0.26100</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>dotnet-FoundryLocal.SemanticKernel.App-cc4901a5-afb7-484f-a0ec-94cead5dcd51</UserSecretsId>

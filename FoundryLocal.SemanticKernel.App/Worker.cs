@@ -21,7 +21,6 @@ public class Worker : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        _logger.LogInformation("Starting web service with model '{ModelAlias}'...", _modelService.ModelAlias);
         await _modelService.StartWebServiceWithModelAsync(stoppingToken);
 
         await using var scope = _scopeFactory.CreateAsyncScope();

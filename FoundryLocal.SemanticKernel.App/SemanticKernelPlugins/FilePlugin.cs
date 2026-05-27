@@ -3,14 +3,9 @@ using System.ComponentModel;
 
 namespace FoundryLocal.SemanticKernel.App.SemanticKernelPlugins;
 
-public sealed class FilePlugin
+public sealed class FilePlugin(ILogger<FilePlugin> logger)
 {
-    private readonly ILogger<FilePlugin> _logger;
-
-    public FilePlugin(ILogger<FilePlugin> logger)
-    {
-        _logger = logger;
-    }
+    private readonly ILogger<FilePlugin> _logger = logger;
 
     [KernelFunction("read_text_file")]
     [Description("Read all text content from a file")]

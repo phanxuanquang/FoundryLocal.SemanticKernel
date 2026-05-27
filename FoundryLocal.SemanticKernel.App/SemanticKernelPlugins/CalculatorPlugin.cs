@@ -3,14 +3,9 @@ using System.ComponentModel;
 
 namespace FoundryLocal.SemanticKernel.App.SemanticKernelPlugins;
 
-public sealed class CalculatorPlugin
+public sealed class CalculatorPlugin(ILogger<CalculatorPlugin> logger)
 {
-    private readonly ILogger<CalculatorPlugin> _logger;
-
-    public CalculatorPlugin(ILogger<CalculatorPlugin> logger)
-    {
-        _logger = logger;
-    }
+    private readonly ILogger<CalculatorPlugin> _logger = logger;
 
     [KernelFunction("add")]
     [Description("Add two numbers together")]

@@ -3,14 +3,9 @@ using System.ComponentModel;
 
 namespace FoundryLocal.SemanticKernel.App.SemanticKernelPlugins;
 
-public sealed class DateTimePlugin
+public sealed class DateTimePlugin(ILogger<DateTimePlugin> logger)
 {
-    private readonly ILogger<DateTimePlugin> _logger;
-
-    public DateTimePlugin(ILogger<DateTimePlugin> logger)
-    {
-        _logger = logger;
-    }
+    private readonly ILogger<DateTimePlugin> _logger = logger;
 
     [KernelFunction("get_current_datetime")]
     [Description("Get current local date and time")]

@@ -4,7 +4,7 @@ namespace FoundryLocal.SemanticKernel.Interfaces;
 
 public interface IFoundryModelService
 {
-    string ModelAlias { get; }
+    IModel FoundryModel { get; }
     Task<IModel> GetModelAsync(CancellationToken cancellationToken = default);
     Task DownloadModelAsync(Action<float>? onProgress = null, CancellationToken cancellationToken = default);
     Task DeleteModelAsync(CancellationToken cancellationToken = default);
