@@ -44,19 +44,6 @@ git clone https://github.com/your-username/FoundryLocal.SemanticKernel.git
 cd FoundryLocal.SemanticKernel
 ```
 
-Edit `src/FoundryLocal.SemanticKernel.App/appsettings.json`:
-
-```json
-{
-  "FoundryLocalOptions": {
-    "AppName": "MyApp",
-    "WebServiceUrl": "http://127.0.0.1:52495",
-    "ModelAlias": "qwen3.5-4b",
-    "LogLevel": "Information"
-  }
-}
-```
-
 **2. Run**
 
 ```bash
